@@ -3,7 +3,7 @@ A script that runs in the background and switches between black and white cursor
 Requires this cursor scheme to be installed: https://www.deviantart.com/twipeep/art/Windows-11-cursor-black-version-572437583  
 
 ## Installation
-1. Download the latest release and store the script in a convenient location.  
+1. Download the [latest release](https://github.com/ItsProfessional/CursorInverter/releases/latest) and store the script in a convenient location.  
 2. Run the script as administrator.  
 3. Profit  
 
