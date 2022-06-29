@@ -2,6 +2,9 @@
 A script that runs in the background and switches between black and white cursor schemes depending on the color under your cursor.  
 Requires the [windows black cursor scheme](https://www.deviantart.com/twipeep/art/Windows-11-cursor-black-version-572437583) to be installed.
 
+## Preview
+https://user-images.githubusercontent.com/63961221/176515985-c6e6b1c0-11ec-445f-9798-6dc3c71d117e.mp4
+
 ## Installation
 1. Download the [latest release](https://github.com/ItsProfessional/CursorInverter/releases/latest) and store the script in a convenient location.  
 2. Run the script as administrator when you want to start the script.  
@@ -25,6 +28,7 @@ $Settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoi
 Register-ScheduledTask -TaskName "CursorInverter" -Trigger $Trigger -Action $Action -RunLevel Highest -Settings $Settings | Out-Null
 Write-Output "CursorInverter has been installed!"
 ```
+
 ## Uninstallation
 Ensure the script is not running(Stop the script using using task manager) and run the following in a administrative powershell window
 ```
