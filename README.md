@@ -4,7 +4,7 @@ Requires this cursor scheme to be installed: https://www.deviantart.com/twipeep/
 
 ## Installation
 1. Download the [latest release](https://github.com/ItsProfessional/CursorInverter/releases/latest) and store the script in a convenient location.  
-2. Run the script as administrator.  
+2. Run the script as administrator when you want to start the script.  
 3. Profit  
 
 Alternatively, the installation can be automated by running the following in a administrative powreshell window.  
@@ -25,8 +25,8 @@ $Settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoi
 Register-ScheduledTask -TaskName "CursorInverter" -Trigger $Trigger -Action $Action -RunLevel Highest -Settings $Settings | Out-Null
 Write-Output "CursorInverter has been installed!"
 ```
-### Uninstallation
-Ensure the script is not running(Stop windows powershell using task manager) and run the following in a administrative powershell window
+## Uninstallation
+Ensure the script is not running(Stop the script using using task manager) and run the following in a administrative powershell window
 ```
 if(!([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] 'Administrator')) {
     Start-Process -FilePath PowerShell -Verb Runas -ArgumentList "-File `"$($MyInvocation.MyCommand.Path)`" `"$($MyInvocation.MyCommand.UnboundArguments)`""
@@ -40,4 +40,4 @@ Write-Output "CursorInverter has been uninstalled!"
 ## How does it work?
 Detects whether the color of the pixel under your cursor is closer to black or white, and setting your cursor to the opposite color.  
 # Disclaimer
-These script is in an early stage, and offered as-is. There will be bugs. I am not responsible for any damage, loss of data, or anything caused by these scripts.
+This script is in an early stage, and offered as-is. There will be bugs. I am not responsible for any damage, loss of data, or anything caused by this script.
