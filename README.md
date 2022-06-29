@@ -18,7 +18,7 @@ if(!([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]:
     Start-Process -FilePath PowerShell -Verb Runas -ArgumentList "-File `"$($MyInvocation.MyCommand.Path)`" `"$($MyInvocation.MyCommand.UnboundArguments)`""
     Exit
 }
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ItsProfessional/Scripts/main/CursorInverter.ps1" -OutFile "$Env:ProgramFiles\CursorInverter.ps1"
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ItsProfessional/CursorInverter/main/CursorInverter.ps1" -OutFile "$Env:ProgramFiles\CursorInverter.ps1"
 $Argument = @'
 vbscript:Execute("CreateObject(""Wscript.Shell"").Run ""powershell -NoLogo -Command """"& 'C:\Program Files\CursorInverter.ps1'"""""", 0 : window.close")
 '@
