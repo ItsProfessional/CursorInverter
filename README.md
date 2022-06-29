@@ -1,6 +1,6 @@
 # CursorInverter
 A script that runs in the background and switches between black and white cursor schemes depending on the color under your cursor.  
-Requires this cursor scheme to be installed: https://www.deviantart.com/twipeep/art/Windows-11-cursor-black-version-572437583  
+Requires the [windows black cursor scheme](https://www.deviantart.com/twipeep/art/Windows-11-cursor-black-version-572437583) to be installed.
 
 ## Installation
 1. Download the [latest release](https://github.com/ItsProfessional/CursorInverter/releases/latest) and store the script in a convenient location.  
