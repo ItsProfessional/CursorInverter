@@ -139,11 +139,11 @@ While($true) {
 				@($X, $($Y-$AdjustmentY)) # Default, Minus
 				@($($X-$AdjustmentX), $Y) # Minus, Default
 				@($X, $($Y+$AdjustmentY)), # Default, Plus
-				@($($X+$AdjustmentX), $Y), # Plus, Default
-				@($($X-$AdjustmentX), $($X-$AdjustmentY)), # Minus, Minus
-				@($($X+$AdjustmentX), $($X+$AdjustmentY)), # Plus, Plus
-				@($($X-$AdjustmentX), $($Y+$AdjustmentY)), # Minus, Plus
-				@($($X+$AdjustmentX), $($Y-$AdjustmentY)) # Minus, Plus
+				@($($X+$AdjustmentX), $Y) # Plus, Default
+				# @($($X-$AdjustmentX), $($X-$AdjustmentY)), # Minus, Minus
+				# @($($X+$AdjustmentX), $($X+$AdjustmentY)), # Plus, Plus
+				# @($($X-$AdjustmentX), $($Y+$AdjustmentY)), # Minus, Plus
+				# @($($X+$AdjustmentX), $($Y-$AdjustmentY)) # Minus, Plus
 			)
 
 			foreach($Pixel in $Pixels) {
