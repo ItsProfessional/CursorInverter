@@ -10,7 +10,7 @@ https://user-images.githubusercontent.com/63961221/176515985-c6e6b1c0-11ec-445f-
 2. Run the script as administrator when you want to start the script.  
 3. Profit  
 
-Alternatively, the installation can be automated by running the following in a administrative powershell window.  
+Alternatively, the installation can be automated by running the following in a *administrative* powershell window.  
 This will run the script automatically at startup
 ```
 iwr "https://raw.githubusercontent.com/ItsProfessional/CursorInverter/main/Install.ps1" | iex
@@ -18,7 +18,7 @@ iwr "https://raw.githubusercontent.com/ItsProfessional/CursorInverter/main/Insta
 
 ## Uninstallation
 If you installed the script manually, stop the script and delete the file. That's it!
-If you installed it using the automated script, run the following in a administrative powershell window to uninstall CursorInverter
+If you installed it using the automated script, run the following in a *administrative* powershell window to uninstall CursorInverter
 ```
 iwr "https://raw.githubusercontent.com/ItsProfessional/CursorInverter/main/Uninstall.ps1" | iex
 ```
