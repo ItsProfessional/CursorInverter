@@ -1,6 +1,6 @@
 if(!([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] 'Administrator')) {
-    Start-Process -FilePath PowerShell -Verb Runas -ArgumentList "-File `"$($MyInvocation.MyCommand.Path)`" `"$($MyInvocation.MyCommand.UnboundArguments)`""
-    Exit
+	Start-Process -FilePath $((Get-Process -Id $PID).Path) -Verb Runas -ArgumentList "-File `"$($MyInvocation.MyCommand.Path)`" `"$($MyInvocation.MyCommand.UnboundArguments)`""
+	Exit
 }
 
 $Sig = @'
@@ -12,7 +12,7 @@ const int SPIF_UPDATEINIFILE = 0x01;
 const int SPIF_SENDCHANGE = 0x02;
 
 public static void UpdateUserPreferencesMask() {
-    SystemParametersInfo(SPI_SETCURSORS, 0, 0, SPIF_UPDATEINIFILE | SPIF_SENDCHANGE);
+	SystemParametersInfo(SPI_SETCURSORS, 0, 0, SPIF_UPDATEINIFILE | SPIF_SENDCHANGE);
 }
 
 [DllImport("user32.dll")]
@@ -33,135 +33,140 @@ $Height = ($Screens.Bounds.Bottom | Measure-Object -Maximum).Maximum
 $Bounds = [Drawing.Rectangle]::FromLTRB($Left, $Top, $Width, $Height)
 
 function IsColorBlack([Int]$Red, [Int]$Green, [Int]$Blue) {
-    $Y = 0.2126*$Red + 0.7152*$Green + 0.0722*$Blue
-    return ($Y -lt 128)
+	$Y = 0.2126*$Red + 0.7152*$Green + 0.0722*$Blue
+	return ($Y -lt 128)
 }
 
 $Bitmap = New-Object System.Drawing.Bitmap([Int]$Bounds.Width), ([Int]$Bounds.Height)
 $Graphics = [Drawing.Graphics]::FromImage($Bitmap)
 
 $RegConnect = [Microsoft.Win32.RegistryKey]::OpenRemoteBaseKey([Microsoft.Win32.RegistryHive]"CurrentUser", "$env:COMPUTERNAME")
-$RegCursors = $RegConnect.OpenSubKey("Control Panel\Cursors",$true)
-$RegSchemes = $RegConnect.OpenSubKey("Control Panel\Cursors\Schemes",$true)
+$RegConnectHKLM = [Microsoft.Win32.RegistryKey]::OpenRemoteBaseKey([Microsoft.Win32.RegistryHive]"LocalMachine", "$env:COMPUTERNAME")
+
+$RegCursors = $RegConnect.OpenSubKey("Control Panel\Cursors", $true)
+$RegSchemes = $RegConnect.OpenSubKey("Control Panel\Cursors\Schemes", $true)
+
+$RegSchemesSystem = $RegConnectHKLM.OpenSubKey("SOFTWARE\Microsoft\Windows\CurrentVersion\Control Panel\Cursors\Schemes", $true)
+
+$WhiteCursor = "Windows Aero"
+$BlackCursor = "Windows black"
+
+function Get-SchemeData([String]$CursorName) {
+	$SchemeSource = "1"
+	$FilesString = $RegSchemes.GetValue($CursorName)
+	if([String]::IsNullOrEmpty($FilesString)) {
+		$SchemeSource = "2"
+		$FilesString = $RegSchemesSystem.GetValue($CursorName)
+	}
+	$Files = $FilesString.Split(',')
+	if($SchemeSource -eq "2") {
+		# Remove the unnecessary non-file element at the end of system schemes
+		$Files = $Files[0..(($Files.Length-1)-1)]
+	}
+	return @($Files, $SchemeSource)
+}
+
+function Set-CursorProperties([String[]]$CursorName) {
+	$SchemeData = Get-SchemeData -CursorName $CursorName
+	$SchemeSource = $SchemeData[1]
+
+	$RegCursors.SetValue("", $CursorName)
+	$RegCursors.SetValue("Scheme Source", $SchemeSource)
+
+	try {
+		$CursorFiles = $SchemeData[0]
+	} catch {
+		Write-Output "You do not have the windows black cursor installed."
+		Write-Output "Install it from here: https://www.deviantart.com/twipeep/art/Windows-11-cursor-black-version-572437583"
+		Pause
+		Exit
+	}
+
+	$RegCursors.SetValue("Arrow", $CursorFiles[0])
+	$RegCursors.SetValue("Help", $CursorFiles[1])
+	$RegCursors.SetValue("AppStarting", $CursorFiles[2])
+	$RegCursors.SetValue("Wait", $CursorFiles[3])
+	$RegCursors.SetValue("Crosshair", $CursorFiles[4])
+	$RegCursors.SetValue("IBeam", $CursorFiles[5])
+	$RegCursors.SetValue("NWPen", $CursorFiles[6])
+	$RegCursors.SetValue("No", $CursorFiles[7])
+	$RegCursors.SetValue("SizeNS", $CursorFiles[8])
+	$RegCursors.SetValue("SizeWE", $CursorFiles[9])
+	$RegCursors.SetValue("SizeNWSE", $CursorFiles[10])
+	$RegCursors.SetValue("SizeNESW", $CursorFiles[11])
+	$RegCursors.SetValue("SizeAll", $CursorFiles[12])
+	$RegCursors.SetValue("UpArrow", $CursorFiles[13])
+	$RegCursors.SetValue("Hand", $CursorFiles[14])
+	$RegCursors.SetValue("Pin", $CursorFiles[15])
+	$RegCursors.SetValue("Person", $CursorFiles[16])
+}
+
+function Get-CurrentCursor {
+	return $RegCursors.GetValue("")
+}
+
+function Get-CommonElement($Array) {
+	if(@($Array | Select-Object -Unique).Count -eq 1) {
+		return $Array[0]
+	} else {
+		return $null
+	}
+}
 
 While($true) {
-    $Graphics.CopyFromScreen($Bounds.Location, [Drawing.Point]::Empty, $Bounds.size)
+	$Graphics.CopyFromScreen($Bounds.Location, [Drawing.Point]::Empty, $Bounds.size)
 
-    $X = [System.Windows.Forms.Cursor]::Position.X
-    $Y = [System.Windows.Forms.Cursor]::Position.Y
+	$X = [System.Windows.Forms.Cursor]::Position.X
+	$Y = [System.Windows.Forms.Cursor]::Position.Y
 
-    $Default = @($X, $Y)
+	# Pixels
+	$Default = @($X, $Y)
+	$DefaultMinus = @($X, $($Y-1))
+	$MinusDefault = @($($X-1), $Y)
+	$DefaultPlus = @($X, $($Y+1))
+	$PlusDefault = @($($X+1), $Y)
+	$MinusMinus = @($($X-1), $($Y-1))
+	$PlusPlus = @($($X+1), $($Y+1))
+	$MinusPlus = @($($X-1), $($Y+1))
+	$PlusMinus = @($($X+1), $($Y-1))
+	$Pixels = @($Default, $DefaultMinus, $MinusDefault, $DefaultPlus, $PlusDefault, $MinusMinus, $PlusPlus, $MinusPlus, $PlusMinus)
 
-    $DefaultMinus = @($X, $($Y-1))
-    $MinusDefault = @($($X-1), $Y)
-    $DefaultPlus = @($X, $($Y+1))
-    $PlusDefault = @($($X+1), $Y)
+	$PixelColors = @()
+	foreach($Pixel in $Pixels) {
+		$X = $Pixel[0]
+		$Y = $Pixel[1]
+		try {
+			$Color = $Bitmap.GetPixel($X, $Y)
+		} catch {
+			# Continue to the next iteration if the X or Y of the pixel is a negative number
+			continue
+		}
 
-    $MinusMinus = @($($X-1), $($Y-1))
-    $PlusPlus = @($($X+1), $($Y+1))
+		$Colors = @($Color.R, $Color.G, $Color.B)
 
-    $MinusPlus = @($($X-1), $($Y+1))
-    $PlusMinus = @($($X+1), $($Y-1))
-    
-    $Pixels = @($Default, $DefaultMinus, $MinusDefault, $DefaultPlus, $PlusDefault, $MinusMinus, $PlusPlus, $MinusPlus, $PlusMinus)
-    $PixelColors = @()
-    foreach($Pixel in $Pixels) {
-        $X = $Pixel[0]
-        $Y = $Pixel[1]
-        try {
-            $Color = $Bitmap.GetPixel($X, $Y)
-        } catch {
-            continue
-        }
+		$IsColorBlack = IsColorBlack -Red $Colors[0] -Green $Colors[1] -Blue $Colors[2]
+		$PixelColors += ,$IsColorBlack
+	}
 
-        $Colors = @($Color.R, $Color.G, $Color.B)
+	$IsColorBlack = Get-CommonElement -Array $PixelColors
+	$CurrentCursor = Get-CurrentCursor
 
-        $Hex = $Color.Name
-        if ($Hex.Length -gt 7) { $Hex = $Hex.Substring(2, $($Hex.Length-2)) }
+	if($null -ne $IsColorBlack) {
+		$Updated = $true
+		if($IsColorBlack -and $CurrentCursor -ne $WhiteCursor) {
+			# Set cursor to white
+			Set-CursorProperties -CursorName $WhiteCursor
+		} elseif(!($IsColorBlack) -and $CurrentCursor -ne $BlackCursor) {
+			# Set cursor to black
+			Set-CursorProperties -CursorName $BlackCursor
+		} else {
+			$Updated = $false
+		}
 
-        $IsColorBlack = IsColorBlack -Red $Colors[0] -Green $Colors[1] -Blue $Colors[2]
-        $PixelColors += ,$IsColorBlack
-    }
-
-    $WhiteCursor = "Windows Default"
-    $BlackCursor = "Windows black"
-
-    try {
-        $BlackCursorFiles = $RegSchemes.GetValue($BlackCursor).Split(',')
-    } catch {
-        Write-Output "You do not have the windows black cursor installed."
-        Write-Output "Install it from here: https://www.deviantart.com/twipeep/art/Windows-11-cursor-black-version-572437583"
-        Pause
-        Exit
-    }
-
-    $WhiteCursorFiles = @(
-        "C:\Windows\cursors\aero_arrow.cur",
-        "C:\Windows\cursors\aero_helpsel.cur",
-        "C:\Windows\cursors\aero_working.ani",
-        "C:\Windows\cursors\aero_busy.ani",
-        "",
-        "",
-        "C:\Windows\cursors\aero_pen.cur",
-        "C:\Windows\cursors\aero_unavail.cur",
-        "C:\Windows\cursors\aero_ns.cur",
-        "C:\Windows\cursors\aero_ew.cur",
-        "C:\Windows\cursors\aero_nwse.cur",
-        "C:\Windows\cursors\aero_nesw.cur",
-        "C:\Windows\cursors\aero_move.cur",
-        "C:\Windows\cursors\aero_up.cur",
-        "C:\Windows\cursors\aero_link.cur",
-        "C:\Windows\cursors\aero_pin.cur",
-        "C:\Windows\cursors\aero_person.cur"
-    )
-
-    function SetCursorFiles([String[]]$CursorFiles) {
-        $RegCursors.SetValue("Arrow", $CursorFiles[0])
-        $RegCursors.SetValue("Help", $CursorFiles[1])
-        $RegCursors.SetValue("AppStarting", $CursorFiles[2])
-        $RegCursors.SetValue("Wait", $CursorFiles[3])
-        $RegCursors.SetValue("Crosshair", $CursorFiles[4])
-        $RegCursors.SetValue("IBeam", $CursorFiles[5])
-        $RegCursors.SetValue("NWPen", $CursorFiles[6])
-        $RegCursors.SetValue("No", $CursorFiles[7])
-        $RegCursors.SetValue("SizeNS", $CursorFiles[8])
-        $RegCursors.SetValue("SizeWE", $CursorFiles[9])
-        $RegCursors.SetValue("SizeNWSE", $CursorFiles[10])
-        $RegCursors.SetValue("SizeNESW", $CursorFiles[11])
-        $RegCursors.SetValue("SizeAll", $CursorFiles[12])
-        $RegCursors.SetValue("UpArrow", $CursorFiles[13])
-        $RegCursors.SetValue("Hand", $CursorFiles[14])
-        $RegCursors.SetValue("Pin", $CursorFiles[15])
-        $RegCursors.SetValue("Person", $CursorFiles[16])
-    }
-
-    function AllEqualInArray($Array, $Element) {
-        return ($Array | Where-Object {$_ -eq $Element}).Length -eq $Array.Length
-    }
-
-    $AllPixelsBlack = AllEqualInArray -Array $PixelColors -Element $true
-    $AllPixelsWhite = AllEqualInArray -Array $PixelColors -Element $false
-
-    if($AllPixelsBlack -or $AllPixelsWhite) {
-        $Updated = $true
-        if($AllPixelsBlack -and ($RegCursors.GetValue("") -ne $WhiteCursor)) {
-            # Set cursor to white
-            $RegCursors.SetValue("", $WhiteCursor)
-            $RegCursors.SetValue("Scheme Source", "2")
-            SetCursorFiles -CursorFiles $WhiteCursorFiles
-        } elseif($AllPixelsWhite -and ($RegCursors.GetValue("") -ne $BlackCursor)) {
-            # Set cursor to black
-            $RegCursors.SetValue("", $BlackCursor)
-            $RegCursors.SetValue("Scheme Source", "1")
-            SetCursorFiles -CursorFiles $BlackCursorFiles
-        } else {
-            $Updated = $false
-        }
-
-        if($Updated) {
-            [void]([Win32.Native]::UpdateUserPreferencesMask())
-        }
-    }
+		if($Updated) {
+			[void]([Win32.Native]::UpdateUserPreferencesMask())
+		}
+	}
 }
 
 $Graphics.Dispose()
@@ -169,4 +174,8 @@ $Bitmap.Dispose()
 
 $RegCursors.Close()
 $RegSchemes.Close()
-$RegConnect.Close()
+
+$RegSchemesSystem.Close()
+
+$RegConnectHKCU.Close()
+$RegConnectHKLM.Close()
