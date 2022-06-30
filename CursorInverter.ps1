@@ -32,7 +32,11 @@ $Width = ($Screens.Bounds.Right | Measure-Object -Maximum).Maximum
 $Height = ($Screens.Bounds.Bottom | Measure-Object -Maximum).Maximum
 $Bounds = [Drawing.Rectangle]::FromLTRB($Left, $Top, $Width, $Height)
 
-function IsColorBlack([Int]$Red, [Int]$Green, [Int]$Blue) {
+function IsColorBlack([Int[]]$Colors) {
+	$Red = $Colors[0]
+	$Green = $Colors[1]
+	$Blue = $Colors[2]
+
 	$Y = 0.2126*$Red + 0.7152*$Green + 0.0722*$Blue
 	return ($Y -lt 128)
 }
@@ -119,33 +123,45 @@ While($true) {
 	$X = [System.Windows.Forms.Cursor]::Position.X
 	$Y = [System.Windows.Forms.Cursor]::Position.Y
 
-	# Pixels
-	$Default = @($X, $Y)
-	$DefaultMinus = @($X, $($Y-1))
-	$MinusDefault = @($($X-1), $Y)
-	$DefaultPlus = @($X, $($Y+1))
-	$PlusDefault = @($($X+1), $Y)
-	$MinusMinus = @($($X-1), $($Y-1))
-	$PlusPlus = @($($X+1), $($Y+1))
-	$MinusPlus = @($($X-1), $($Y+1))
-	$PlusMinus = @($($X+1), $($Y-1))
-	$Pixels = @($Default, $DefaultMinus, $MinusDefault, $DefaultPlus, $PlusDefault, $MinusMinus, $PlusPlus, $MinusPlus, $PlusMinus)
-
 	$PixelColors = @()
-	foreach($Pixel in $Pixels) {
-		$X = $Pixel[0]
-		$Y = $Pixel[1]
-		try {
-			$Color = $Bitmap.GetPixel($X, $Y)
-		} catch {
-			# Continue to the next iteration if the X or Y of the pixel is a negative number
-			continue
-		}
+	# 1..5 | ForEach-Object {
+	#     $AdjustmentX = $_
+	#     1..5 | ForEach-Object {
+	#         $AdjustmentY = $_
 
-		$Colors = @($Color.R, $Color.G, $Color.B)
+			$Adjustment = 1
+			$AdjustmentX = $Adjustment 
+			$AdjustmentY = $Adjustment 
 
-		$IsColorBlack = IsColorBlack -Red $Colors[0] -Green $Colors[1] -Blue $Colors[2]
-		$PixelColors += ,$IsColorBlack
+			# Pixels
+			$Pixels = @(
+				@($X, $Y), # Default, Default
+				@($X, $($Y-$AdjustmentY)) # Default, Minus
+				@($($X-$AdjustmentX), $Y) # Minus, Default
+				@($X, $($Y+$AdjustmentY)), # Default, Plus
+				@($($X+$AdjustmentX), $Y), # Plus, Default
+				@($($X-$AdjustmentX), $($X-$AdjustmentY)), # Minus, Minus
+				@($($X+$AdjustmentX), $($X+$AdjustmentY)), # Plus, Plus
+				@($($X-$AdjustmentX), $($Y+$AdjustmentY)), # Minus, Plus
+				@($($X+$AdjustmentX), $($Y-$AdjustmentY)) # Minus, Plus
+			)
+
+			foreach($Pixel in $Pixels) {
+				$NewX = $Pixel[0]
+				$NewY = $Pixel[1]
+
+				try {
+					$Color = $Bitmap.GetPixel($NewX, $NewY)
+				} catch {
+					# Continue to the next iteration if the X or Y of the pixel is a negative number
+					continue
+				}
+
+				$Colors = @($Color.R, $Color.G, $Color.B)
+				$IsColorBlack = IsColorBlack -Colors $Colors
+				$PixelColors += ,$IsColorBlack
+		#     }
+		# }
 	}
 
 	$IsColorBlack = Get-CommonElement -Array $PixelColors
