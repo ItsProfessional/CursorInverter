@@ -25,5 +25,5 @@ iwr "https://raw.githubusercontent.com/ItsProfessional/CursorInverter/main/Unins
 
 ## How does it work?
 This script detects whether the color of the pixel under your cursor is closer to black or white, and sets your cursor to the opposite color.  
-# Disclaimer
+## Disclaimer
 This script is in an early stage, and offered as-is. There will be bugs. I am not responsible for any damage, loss of data, or anything caused by this script.
