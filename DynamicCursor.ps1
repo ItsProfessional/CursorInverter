@@ -23,7 +23,7 @@ Add-Type -AssemblyName System.Windows.Forms, System.Drawing
 
 [void]([Win32.Native]::SetProcessDPIAware())
 
-$Host.UI.RawUI.WindowTitle = "Cursor Inverter"
+$Host.UI.RawUI.WindowTitle = "DynamicCursor"
 
 $Screens = [Windows.Forms.Screen]::AllScreens
 $Top = ($Screens.Bounds.Top | Measure-Object -Minimum).Minimum
