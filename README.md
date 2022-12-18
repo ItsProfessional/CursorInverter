@@ -11,19 +11,20 @@ https://user-images.githubusercontent.com/63961221/176515985-c6e6b1c0-11ec-445f-
 The installation can be automated by running the following in a elevated powershell window.  
 This will run the script automatically at startup
 ```
-iwr "https://raw.githubusercontent.com/ItsProfessional/DynamicCursor/main/Install.ps1" | iex
+irm raw.githubusercontent.com/ItsProfessional/DynamicCursor/main/Install.ps1 | iex
 ```
 **Note: You can also run the standalone script in the releases page. (Make sure to elevate it, otherwise the cursor won't change.)**
 
 ## Uninstallation
-If you are using the portable version, stop the script and delete the file. That's it!
+If you are using the portable version, stop the script and delete the file.
 If you installed it using the automated script, run the following in a elevated powershell window to uninstall CursorInverter
 ```
-iwr "https://raw.githubusercontent.com/ItsProfessional/DynamicCursor/main/Uninstall.ps1" | iex
+irm raw.githubusercontent.com/ItsProfessional/DynamicCursor/main/Uninstall.ps1 | iex
 ```
 
 ## How does it work?
 This script detects whether the color of the pixel under your cursor is closer to black or white, and sets your cursor to the opposite color.
 
 ## Disclaimer
-This script is in an early stage, and offered as-is. There will be bugs. I am not responsible for any damage, loss of data, or anything caused by this script.
+**This script is in an early stage, and offered as-is. There will be bugs. I am not responsible for any damage, loss of data, or anything caused by this script.**
+This script, as of right now, uses a lot of memory and may slow down your computer.
