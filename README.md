@@ -26,5 +26,5 @@ irm raw.githubusercontent.com/ItsProfessional/DynamicCursor/main/Uninstall.ps1 |
 This script detects whether the color of the pixel under your cursor is closer to black or white, and sets your cursor to the opposite color.
 
 ## Disclaimer
-**This script is in an early stage, and offered as-is. There will be bugs. I am not responsible for any damage, loss of data, or anything caused by this script.**
+**This script is in an early stage, and offered as-is. There will be bugs. I am not responsible for any damage, loss of data, or anything caused by this script.**  
 This script, as of right now, uses a lot of memory and may slow down your computer.
